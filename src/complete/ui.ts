@@ -4,7 +4,9 @@ document.body.appendChild(element);
 element.style.visibility = 'hidden'
 element.style.position = 'fixed';
 element.style.border = '1px lightgrey solid';
-let selected: HTMLElement | undefined;
+element.style.borderCollapse = 'collapse'
+let selected_e: HTMLElement | undefined;
+export let selected_value: string = '';
 function line(e: MatchResult): HTMLElement {
     let result = document.createElement('tr');
     let name_e = document.createElement('td');
@@ -21,7 +23,7 @@ export function refresh(list: MatchResult[]) {
     }
     if(to_replace.length > 0) {
         to_replace[0].style.backgroundColor = 'lightgrey';
-        selected = to_replace[0];
+        selected_e = to_replace[0];
     }
     element.replaceChildren(...to_replace)
 }

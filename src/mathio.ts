@@ -6,6 +6,8 @@ export class MathIO {
     private cursor: MathMLElement;
     private completing = false;
     private completing_text = '';
+    private completing_e1: MathMLElement;
+    private completing_e2: MathMLElement;
     private _root_node: MathMLElement;
     public get root_node(): MathMLElement {
         return this._root_node
@@ -28,6 +30,9 @@ export class MathIO {
         // this.cursor = ml_nodes('msubsup', [ml_text('mo', '&#x222B;'), ml_text('mn', '1'), ml_text('mn', '0')]);
         this.cursor = create_cursor()
         this.root_node.appendChild(this.cursor);
+
+        this.completing_e1 = ml_text('mtext', '\\');
+        this.completing_e2 = ml_e('mtext');
     }
     private warn(warning: string) {
         if(this._warn_handle) this._warn_handle(warning)
@@ -160,11 +165,20 @@ export class MathIO {
     }
     private start_completing() {
         refresh_complete(complete(this.completing_text));
-        this.cursor.insertAdjacentElement('beforebegin', ml_e('mtext'));
+        this.cursor.insertAdjacentElement('beforebegin', this.completing_e1);
+        this.cursor.insertAdjacentElement('afterend', this.completing_e2);
         let box = this.cursor.getBoundingClientRect();
         completing_list.style.left = box.x + 'px';
         completing_list.style.top = box.y + box.height + 'px';
         completing_list.style.visibility = 'visible';
+    }
+    private stop_completing() {
+        completing_list.style.visibility = 'hidden';
+        this.completing_e1.remove();
+        this.completing_e2.remove();
+        this.completing_e1.innerHTML = '\\';
+        this.completing_e2.innerHTML = this.completing_text = '';
+        this.completing = false;
     }
     private on_complete_key(key: string) {
         if(key == "Tab" || key == 'Space') {
@@ -178,17 +192,15 @@ export class MathIO {
         } else if(key == 'ArrowDown') {
 
         } else if(key == 'Backspace') {
-            let prev_e = this.cursor.previousElementSibling;
+            let s = this.completing_e1.innerHTML;
+            if(s.length > 0) {
+                this.completing_e1.innerHTML = s.slice(0, s.length - 1);
+            } else if(this.completing_e2.innerHTML.length == 0) {
+                this.stop_completing();
+            }
         } else if(key.length == 1) {
             this.completing_text += key;
-            let prev_e = this.cursor.previousElementSibling;
-            if(prev_e) {
-                prev_e.innerHTML += key;
-            } else {
-                let prev_e = ml_e('mtext');
-                prev_e.innerHTML = key;
-                this.cursor.insertAdjacentElement('beforebegin', prev_e);
-            }
+            this.completing_e1.innerHTML += key;
             refresh_complete(complete(this.completing_text));
             let box = this.cursor.getBoundingClientRect();
             completing_list.style.left = box.x + 'px';
