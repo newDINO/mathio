@@ -1,0 +1,19 @@
+body {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    height: 100vh;
+}
+.math_container {
+    width: 500px;
+    height: 150px;
+    padding: 7px;
+    border: 1px grey solid;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+.math_container:focus {
+    outline: none;
+    border: 2px gray solid;
+}

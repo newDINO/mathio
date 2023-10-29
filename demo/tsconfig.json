@@ -1,0 +1,9 @@
+{
+    "files": ["main.ts", "../target/mathio.d.ts"],
+    "compilerOptions": {
+        "module": "ES6",
+        "target": "ES6",
+        "lib": ["DOM", "ES6"],
+        "strict": true
+    }
+}
