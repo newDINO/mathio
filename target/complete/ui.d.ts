@@ -4,3 +4,4 @@ export declare function selected_value(): string | null;
 export declare function refresh(list: MatchResult[]): void;
 export declare function next(): void;
 export declare function previous(): void;
+export declare function select(index: number): string;

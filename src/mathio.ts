@@ -8,6 +8,10 @@ export class MathIO {
     private completing_e1: MathMLElement;
     private completing_e2: MathMLElement;
     private _root_node: MathMLElement;
+    private _container: HTMLElement;
+    public get container(): HTMLElement {
+        return this._container;
+    }
     public get root_node(): MathMLElement {
         return this._root_node
     }
@@ -21,7 +25,9 @@ export class MathIO {
         this._vertical_fraction = setting
     }
     constructor() {
+        this._container = document.createElement('div');
         this._root_node = ml_text('math', '');
+        this._container.append(this._root_node, complete_ui.list_e);
         this._root_node.setAttribute('display', 'block')
         this.root_node.style.userSelect = 'none';
         this.root_node.style.cursor = 'text'
@@ -39,6 +45,17 @@ export class MathIO {
     on_pointerdown(event: PointerEvent) {
         let e = event.target;
         if(!(e instanceof Element)) return;
+        if(this.completing) {
+            let list_box = complete_ui.list_e.getBoundingClientRect();
+            if(within_rect(event.clientX, event.clientY, list_box)) {
+                let unit_height = list_box.height / complete_ui.list_e.children.length;
+                let key = complete_ui.select(Math.floor((event.clientY - list_box.y) / unit_height));
+                this.stop_completing();
+                this.on_key(key);
+                return;
+            } else {
+            }
+        }
         let last_prev_e = this.cursor.previousElementSibling;
         let last_next_e = this.cursor.nextElementSibling;
         let last_parent = this.cursor.parentElement;
@@ -156,6 +173,7 @@ export class MathIO {
         } else if(key == '/') {
             this.on_fraction();
         } else if(key == '√') {
+            this.on_root();
         } else if(key == '\\') {
             this.completing = true;
             this.start_completing();
@@ -649,6 +667,12 @@ export class MathIO {
         }
         this.cursor.insertAdjacentElement('beforebegin', ml_text('mi', key));
     }
+    private on_root() {
+        let msqrt = ml_e('msqrt');
+        this.cursor.insertAdjacentElement('beforebegin', msqrt);
+        let mrow = ml_nodes('mrow', this.cursor);
+        msqrt.appendChild(mrow);
+    }
 }
 function ml_e(type: string): MathMLElement {
     return document.createElementNS('http://www.w3.org/1998/Math/MathML', type)
@@ -775,4 +799,7 @@ function insert_in_pos(x: number, container: Element, to_insert: Element) {
         }
     }
     es[es.length - 1].insertAdjacentElement('afterend', to_insert)
+}
+function within_rect(x: number, y: number, rect: DOMRect): boolean {
+    return x > rect.x && x < rect.x + rect.width && y > rect.y && y < rect.y + rect.height
 }

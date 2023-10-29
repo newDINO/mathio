@@ -4,6 +4,8 @@ export declare class MathIO {
     private completing_e1;
     private completing_e2;
     private _root_node;
+    private _container;
+    get container(): HTMLElement;
     get root_node(): MathMLElement;
     private _warn_handle;
     set warn_handle(handle: (warning: string) => void);
@@ -28,4 +30,5 @@ export declare class MathIO {
     private on_fraction;
     private on_num;
     private on_char;
+    private on_root;
 }

@@ -1,7 +1,6 @@
 import { MatchResult } from "./complete.js"
 export let list_e = document.createElement('table');
 const selected_color = 'rgb(127 127 127 / .5)';
-document.body.appendChild(list_e);
 list_e.style.visibility = 'hidden'
 list_e.style.position = 'fixed';
 list_e.style.border = '1px rgb(127 127 127 / .5) solid';
@@ -58,6 +57,10 @@ export function previous() {
         lines[selected_index].element.style.backgroundColor = selected_color;
     }
 }
+export function select(index: number): string {
+    return lines[index].value
+}
+const hover_color = 'rgb(127 127 127 / .25)'
 class Line {
     element: HTMLElement;
     value: string;
@@ -69,5 +72,15 @@ class Line {
         let value_e = document.createElement('td');
         value_e.textContent = e.value;
         this.element.append(name_e, value_e);
+        this.element.addEventListener('pointerenter', () => {
+            if(lines[selected_index] != this) {
+                this.element.style.backgroundColor = hover_color;
+            }
+        })
+        this.element.addEventListener('pointerleave', () => {
+            if(lines[selected_index] != this) {
+                this.element.style.backgroundColor = '';
+            }
+        })
     }
 }

@@ -7,7 +7,7 @@ body {
 @media (prefers-color-scheme: dark) {
     body {
         background-color: #111111;
-        color: lightgray;
+        color: white;
     }
 }
 .math_container {

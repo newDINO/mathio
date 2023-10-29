@@ -3,6 +3,9 @@ import * as complete_ui from "./complete/ui.js";
 const INTERNAL_LOGIC_ERROR = new Error('Internal logic error');
 const ORPHAN_ERROR = new Error('Element does not has a parent');
 export class MathIO {
+    get container() {
+        return this._container;
+    }
     get root_node() {
         return this._root_node;
     }
@@ -16,7 +19,9 @@ export class MathIO {
         this.completing = false;
         // settings
         this._vertical_fraction = true;
+        this._container = document.createElement('div');
         this._root_node = ml_text('math', '');
+        this._container.append(this._root_node, complete_ui.list_e);
         this._root_node.setAttribute('display', 'block');
         this.root_node.style.userSelect = 'none';
         this.root_node.style.cursor = 'text';
@@ -35,6 +40,18 @@ export class MathIO {
         let e = event.target;
         if (!(e instanceof Element))
             return;
+        if (this.completing) {
+            let list_box = complete_ui.list_e.getBoundingClientRect();
+            if (within_rect(event.clientX, event.clientY, list_box)) {
+                let unit_height = list_box.height / complete_ui.list_e.children.length;
+                let key = complete_ui.select(Math.floor((event.clientY - list_box.y) / unit_height));
+                this.stop_completing();
+                this.on_key(key);
+                return;
+            }
+            else {
+            }
+        }
         let last_prev_e = this.cursor.previousElementSibling;
         let last_next_e = this.cursor.nextElementSibling;
         let last_parent = this.cursor.parentElement;
@@ -181,6 +198,7 @@ export class MathIO {
             this.on_fraction();
         }
         else if (key == '√') {
+            this.on_root();
         }
         else if (key == '\\') {
             this.completing = true;
@@ -770,6 +788,12 @@ export class MathIO {
         }
         this.cursor.insertAdjacentElement('beforebegin', ml_text('mi', key));
     }
+    on_root() {
+        let msqrt = ml_e('msqrt');
+        this.cursor.insertAdjacentElement('beforebegin', msqrt);
+        let mrow = ml_nodes('mrow', this.cursor);
+        msqrt.appendChild(mrow);
+    }
 }
 function ml_e(type) {
     return document.createElementNS('http://www.w3.org/1998/Math/MathML', type);
@@ -907,4 +931,7 @@ function insert_in_pos(x, container, to_insert) {
         }
     }
     es[es.length - 1].insertAdjacentElement('afterend', to_insert);
+}
+function within_rect(x, y, rect) {
+    return x > rect.x && x < rect.x + rect.width && y > rect.y && y < rect.y + rect.height;
 }
