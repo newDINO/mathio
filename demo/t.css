@@ -4,6 +4,12 @@ body {
     align-items: center;
     height: 100vh;
 }
+@media (prefers-color-scheme: dark) {
+    body {
+        background-color: #111111;
+        color: lightgray;
+    }
+}
 .math_container {
     width: 500px;
     height: 150px;

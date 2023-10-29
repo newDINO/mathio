@@ -1,5 +1,5 @@
 import { complete } from "./complete/complete.js";
-import { element as completing_list, refresh as refresh_complete } from "./complete/ui.js";
+import * as complete_ui from "./complete/ui.js";
 const INTERNAL_LOGIC_ERROR = new Error('Internal logic error');
 const ORPHAN_ERROR = new Error('Element does not has a parent');
 export class MathIO {
@@ -14,7 +14,6 @@ export class MathIO {
     }
     constructor() {
         this.completing = false;
-        this.completing_text = '';
         // settings
         this._vertical_fraction = true;
         this._root_node = ml_text('math', '');
@@ -24,6 +23,8 @@ export class MathIO {
         // this.cursor = ml_nodes('msubsup', [ml_text('mo', '&#x222B;'), ml_text('mn', '1'), ml_text('mn', '0')]);
         this.cursor = create_cursor();
         this.root_node.appendChild(this.cursor);
+        this.completing_e1 = ml_text('mtext', '\\');
+        this.completing_e2 = ml_e('mtext');
     }
     warn(warning) {
         if (this._warn_handle)
@@ -32,7 +33,6 @@ export class MathIO {
     on_pointerdown(event) {
         var _a;
         let e = event.target;
-        console.log(e);
         if (!(e instanceof Element))
             return;
         let last_prev_e = this.cursor.previousElementSibling;
@@ -172,6 +172,8 @@ export class MathIO {
         else if (key == '+' || key == '-' || key == '=' || key == '(' || key == ')') {
             this.cursor.insertAdjacentElement('beforebegin', ml_text('mo', key));
         }
+        else if (key == 'Π' || key == 'Σ') {
+        }
         else if (is_char(key)) {
             this.on_char(key);
         }
@@ -187,41 +189,78 @@ export class MathIO {
         this.resize_cursor();
     }
     start_completing() {
-        refresh_complete(complete(this.completing_text));
-        this.cursor.insertAdjacentElement('beforebegin', ml_e('mtext'));
+        complete_ui.refresh(complete(''));
+        this.cursor.insertAdjacentElement('beforebegin', this.completing_e1);
+        this.cursor.insertAdjacentElement('afterend', this.completing_e2);
         let box = this.cursor.getBoundingClientRect();
-        completing_list.style.left = box.x + 'px';
-        completing_list.style.top = box.y + box.height + 'px';
-        completing_list.style.visibility = 'visible';
+        complete_ui.list_e.style.left = box.x + 'px';
+        complete_ui.list_e.style.top = box.y + box.height + 'px';
+        complete_ui.list_e.style.visibility = 'visible';
+    }
+    stop_completing() {
+        complete_ui.list_e.style.visibility = 'hidden';
+        this.completing_e1.remove();
+        this.completing_e2.remove();
+        this.completing_e1.innerHTML = '\\';
+        this.completing_e2.innerHTML = '';
+        this.completing = false;
+    }
+    refresh_completing() {
+        let text = this.completing_e1.innerHTML.slice(1) + this.completing_e2.innerHTML;
+        complete_ui.refresh(complete(text));
+        let box = this.cursor.getBoundingClientRect();
+        complete_ui.list_e.style.left = box.x + 'px';
+        complete_ui.list_e.style.top = box.y + box.height + 'px';
     }
     on_complete_key(key) {
-        if (key == "Tab" || key == 'Space') {
+        if (key == "Tab" || key == ' ') {
+            this.stop_completing();
+            let selected_value = complete_ui.selected_value();
+            if (selected_value) {
+                this.on_key(selected_value);
+            }
         }
         else if (key == 'ArrowLeft') {
-        }
-        else if (key == 'ArrowRight') {
-        }
-        else if (key == 'ArrowUp') {
-        }
-        else if (key == 'ArrowDown') {
-        }
-        else if (key == 'Backspace') {
-        }
-        else if (key.length == 1) {
-            this.completing_text += key;
-            let prev_e = this.cursor.previousElementSibling;
-            if (prev_e) {
-                prev_e.innerHTML += key;
+            if (this.completing_e1.innerHTML.length > 1) {
+                let text1 = this.completing_e1.innerHTML;
+                this.completing_e2.innerHTML = text1[text1.length - 1] + this.completing_e2.innerHTML;
+                this.completing_e1.innerHTML = text1.slice(0, -1);
             }
             else {
-                let prev_e = ml_e('mtext');
-                prev_e.innerHTML = key;
-                this.cursor.insertAdjacentElement('beforebegin', prev_e);
+                this.completing_e1.innerHTML += this.completing_e2.innerHTML;
+                this.completing_e2.innerHTML = '';
             }
-            refresh_complete(complete(this.completing_text));
-            let box = this.cursor.getBoundingClientRect();
-            completing_list.style.left = box.x + 'px';
-            completing_list.style.top = box.y + box.height + 'px';
+        }
+        else if (key == 'ArrowRight') {
+            if (this.completing_e2.innerHTML.length > 0) {
+                let text2 = this.completing_e2.innerHTML;
+                this.completing_e1.innerHTML += text2[0];
+                this.completing_e2.innerHTML = text2.slice(1);
+            }
+            else {
+                this.completing_e2.innerHTML = this.completing_e1.innerHTML.slice(1);
+                this.completing_e1.innerHTML = '\\';
+            }
+        }
+        else if (key == 'ArrowUp') {
+            complete_ui.previous();
+        }
+        else if (key == 'ArrowDown') {
+            complete_ui.next();
+        }
+        else if (key == 'Backspace') {
+            let s = this.completing_e1.innerHTML;
+            if (s.length > 1) {
+                this.completing_e1.innerHTML = s.slice(0, s.length - 1);
+                this.refresh_completing();
+            }
+            else if (this.completing_e2.innerHTML.length == 0) {
+                this.stop_completing();
+            }
+        }
+        else if (key.length == 1) {
+            this.completing_e1.innerHTML += key;
+            this.refresh_completing();
         }
     }
     resize_cursor() {
@@ -774,7 +813,7 @@ function is_char(s) {
     let code = s.codePointAt(0);
     if (!code)
         throw BLANK_STRING_ERROR;
-    return (code >= 65 && code <= 90) || (code >= 97 && code <= 122);
+    return (code >= 65 && code <= 90) || (code >= 97 && code <= 122) || (code >= 945 && code <= 969);
 }
 function is_num(s) {
     let code = s.codePointAt(0);

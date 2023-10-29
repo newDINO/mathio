@@ -1,7 +1,8 @@
 export declare class MathIO {
     private cursor;
     private completing;
-    private completing_text;
+    private completing_e1;
+    private completing_e2;
     private _root_node;
     get root_node(): MathMLElement;
     private _warn_handle;
@@ -13,6 +14,8 @@ export declare class MathIO {
     on_pointerdown(event: PointerEvent): void;
     on_key(key: string): void;
     private start_completing;
+    private stop_completing;
+    private refresh_completing;
     private on_complete_key;
     private resize_cursor;
     private on_arrow_up;

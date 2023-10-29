@@ -10,7 +10,7 @@ mathml_container.addEventListener('pointerdown', (e) => {
     mathio.on_pointerdown(e);
 });
 mathml_container.addEventListener('keydown', (e) => {
-    if (e.key == 'ArrowUp' || e.key == 'ArrowDown') {
+    if (e.key == 'ArrowUp' || e.key == 'ArrowDown' || e.key == ' ' || e.key == 'Tab') {
         e.preventDefault();
     }
     mathio.on_key(e.key);
