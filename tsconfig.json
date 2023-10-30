@@ -1,5 +1,11 @@
 {
-    "files": ["src/mathio.ts", "src/complete/entity_data.ts", "src/complete/complete.ts", "src/complete/complete.ts"],
+    "files": [
+        "src/mathio.ts",
+        "src/complete/entity_data.ts",
+        "src/complete/complete.ts",
+        "src/complete/complete.ts",
+        "src/soft_keyboard.ts"
+    ],
     "compilerOptions": {
         "strict": true,
         "module": "ES6",
