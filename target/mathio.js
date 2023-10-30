@@ -65,7 +65,7 @@ export class MathIO {
         if (!last_grand_parent || !grand_parent) {
             throw ORPHAN_ERROR;
         }
-        if (e.tagName != 'mrow' && (parent.tagName == 'mfrac' || parent.tagName == 'msub' || (parent.tagName == 'msup' && e == parent.lastElementChild))) {
+        if (e.tagName != 'mrow' && (parent.tagName == 'msqrt' || parent.tagName == 'mfrac' || parent.tagName == 'msub' || (parent.tagName == 'msup' && e == parent.lastElementChild))) {
             encircle_element(e, 'mrow');
         }
         if (e.tagName == 'mo' || e.tagName == 'mi') {
@@ -444,6 +444,18 @@ export class MathIO {
                     replace_parent(parent.firstElementChild);
                 }
             }
+            else if (next_e.tagName == 'msqrt') {
+                if (!next_e.firstElementChild)
+                    throw INTERNAL_LOGIC_ERROR;
+                let first_child = next_e.firstElementChild;
+                if (first_child.tagName != 'mrow') {
+                    encircle_element(first_child, 'mrow');
+                }
+                if (first_child.tagName == 'mspace') {
+                    first_child.remove();
+                }
+                next_e.firstElementChild.insertAdjacentElement('afterbegin', this.cursor);
+            }
             else {
                 next_e.insertAdjacentElement('afterend', this.cursor);
             }
@@ -515,6 +527,12 @@ export class MathIO {
             if (parent.childElementCount == 1) {
                 replace_parent(parent.firstElementChild);
             }
+            else if (parent.childElementCount == 0) {
+                parent.remove();
+                let space = ml_space();
+                space.setAttribute('width', '2px');
+                grand_parent.appendChild(space);
+            }
         }
     }
     on_arrow_left() {
@@ -546,6 +564,18 @@ export class MathIO {
                     last_child.remove();
                 }
                 prev_e.lastElementChild.appendChild(this.cursor);
+            }
+            else if (prev_e.tagName == 'msqrt') {
+                if (!prev_e.firstElementChild)
+                    throw INTERNAL_LOGIC_ERROR;
+                let first_child = prev_e.firstElementChild;
+                if (first_child.tagName != 'mrow') {
+                    encircle_element(first_child, 'mrow');
+                }
+                if (first_child.tagName == 'mspace') {
+                    first_child.remove();
+                }
+                prev_e.firstElementChild.appendChild(this.cursor);
             }
             else if (prev_e.tagName == 'mn') {
                 if (prev_e.innerHTML.length > 1) {
@@ -694,6 +724,12 @@ export class MathIO {
             }
             else if (grand_parent.tagName == 'mfrac') {
                 if (parent == grand_parent.firstElementChild) {
+                    if (!grand_parent.lastElementChild)
+                        throw INTERNAL_LOGIC_ERROR;
+                    if (parent.childElementCount == 1 && grand_parent.lastElementChild.tagName == 'mspace') {
+                        grand_parent.insertAdjacentElement('beforebegin', this.cursor);
+                        grand_parent.remove();
+                    }
                 }
                 else if (parent == grand_parent.lastElementChild && parent.childElementCount == 1) {
                     let first_child = grand_parent.firstElementChild;
@@ -708,6 +744,10 @@ export class MathIO {
                         grand_parent.remove();
                     }
                 }
+            }
+            else if (grand_parent.tagName == 'msqrt') {
+                grand_parent.insertAdjacentElement('beforebegin', this.cursor);
+                grand_parent.remove();
             }
         }
     }
@@ -916,7 +956,7 @@ function is_single_exp(e) {
     return e.tagName == 'mn' || e.tagName == 'mi' || e.tagName == 'msup' || e.tagName == 'msub' || e.tagName == 'mfrac';
 }
 function is_group_exp(e) {
-    return e.tagName == 'msup' || e.tagName == 'msub' || e.tagName == 'mfrac';
+    return e.tagName == 'msup' || e.tagName == 'msub' || e.tagName == 'mfrac' || e.tagName == 'msqrt';
 }
 function create_cursor() {
     let cursor = ml_e('mspace');
