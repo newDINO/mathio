@@ -1,0 +1,18 @@
+<svg version="1.2" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 30 30" width="30" height="30">
+	<title>New Project</title>
+	<style>
+		.s0 { fill: none;stroke: #000000;stroke-miterlimit:100 } 
+		.s1 { fill: #000000 } 
+	</style>
+	<path id="Background" class="s0" d="m3 6h23v17h-23z"/>
+	<path id="Shape 1" class="s1" d="m6 9h3v3h-3z"/>
+	<path id="Shape 1 copy" class="s1" d="m11 9h3v3h-3z"/>
+	<path id="Shape 1 copy 2" class="s1" d="m16 9h3v3h-3z"/>
+	<path id="Shape 1 copy 3" class="s1" d="m21 9h3v3h-3z"/>
+	<path id="Shape 3" class="s1" d="m17 13h5v3h-5z"/>
+	<path id="Shape 1 copy 8" class="s1" d="m21 17h3v3h-3z"/>
+	<path id="Shape 2" class="s1" d="m10 17h9v3h-9z"/>
+	<path id="Shape 1 copy 6" class="s1" d="m12 13h3v3h-3z"/>
+	<path id="Shape 1 copy 7" class="s1" d="m5 17h3v3h-3z"/>
+	<path id="Shape 1 copy 5" class="s1" d="m7 13h3v3h-3z"/>
+</svg>

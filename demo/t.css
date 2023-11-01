@@ -10,9 +10,15 @@ body {
         color: white;
     }
 }
+
+.container::after {
+    content: "";
+    display: block;
+    height: 100px;
+}
 .math_container {
     width: 500px;
-    height: 150px;
+    height: 100px;
     padding: 7px;
     border: 1px grey solid;
     display: flex;
@@ -23,6 +29,25 @@ body {
     outline: none;
     border: 2px gray solid;
 }
+
+.bar {
+    display: flex;
+    margin-top: 3px;
+    margin-bottom: 3px;
+}
 .keyboard {
-    max-height: 61.8%;
+    max-height: 48%;
+    position: fixed;
+    width: 97vw;
+    height: 61.8vw;
+    bottom: 0px;
+}
+.button {
+    border: 1px grey solid;
+    width: 30px;
+    height: 30px;
+    filter: opacity(50%);
+}
+.button:hover {
+    background: grey;
 }
