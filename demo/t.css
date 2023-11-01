@@ -17,6 +17,7 @@ body {
     height: 100px;
 }
 .math_container {
+	max-width: 96vw;
     width: 500px;
     height: 100px;
     padding: 7px;
@@ -39,7 +40,7 @@ body {
     max-height: 48%;
     position: fixed;
     width: 97vw;
-    height: 61.8vw;
+    height: 70vw;
     bottom: 0px;
 }
 .button {
