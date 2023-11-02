@@ -26,7 +26,7 @@ let keyboard_button = document.createElement('div');
 keyboard_button.style.marginLeft = 'auto'
 under_bar.appendChild(keyboard_button)
 keyboard_button.classList.add('button')
-keyboard_button.style.backgroundImage = 'url("/demo/res/keyboard.svg")'
+keyboard_button.style.backgroundImage = 'url("demo/res/keyboard.svg")'
 let soft_keyboard = new SoftKeyboard((key) => {
     mathio.on_key(key)
 });
