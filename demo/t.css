@@ -9,6 +9,9 @@ body {
         background-color: #111111;
         color: white;
     }
+    .button {
+        filter: invert(100%);
+    }
 }
 
 .container::after {
@@ -47,7 +50,7 @@ body {
     border: 1px grey solid;
     width: 30px;
     height: 30px;
-    filter: opacity(50%);
+    opacity: 0.5;
 }
 .button:hover {
     background: grey;
