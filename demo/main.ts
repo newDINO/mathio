@@ -22,8 +22,17 @@ mathio.container.addEventListener('keydown', (e) => {
 let under_bar = document.createElement('div')
 under_bar.classList.add("bar")
 container.appendChild(under_bar);
+
+let copy_button = document.createElement('div');
+under_bar.appendChild(copy_button);
+copy_button.classList.add('button');
+copy_button.style.marginLeft = 'auto';
+copy_button.style.backgroundImage = 'url("demo/res/copy.svg")';
+copy_button.addEventListener('pointerdown', () => {
+	navigator.clipboard.writeText(mathio.to_ml_text());
+})
+
 let keyboard_button = document.createElement('div');
-keyboard_button.style.marginLeft = 'auto'
 under_bar.appendChild(keyboard_button)
 keyboard_button.classList.add('button')
 keyboard_button.style.backgroundImage = 'url("demo/res/keyboard.svg")'
