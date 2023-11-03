@@ -13,6 +13,7 @@ export declare class MathIO {
     set vertical_fraction(setting: boolean);
     constructor();
     private warn;
+    to_ml_text(): string;
     on_pointerdown(event: PointerEvent): void;
     on_key(key: string): void;
     private start_completing;

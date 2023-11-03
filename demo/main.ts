@@ -40,3 +40,4 @@ keyboard_button.addEventListener('pointerdown', () => {
         soft_keyboard.container.style.display = 'none'
     }
 })
+

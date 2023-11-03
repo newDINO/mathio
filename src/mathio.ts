@@ -42,6 +42,28 @@ export class MathIO {
     private warn(warning: string) {
         if(this._warn_handle) this._warn_handle(warning)
     }
+    to_ml_text(): string {
+        let result;
+        let prev_e = this.cursor.previousElementSibling;
+        if(prev_e) {
+            this.cursor.remove();
+            result = this.root_node.innerHTML;
+            prev_e.insertAdjacentElement('afterend', this.cursor);
+            return result;
+        }
+        let next_e = this.cursor.nextElementSibling;
+        if(next_e) {
+            this.cursor.remove();
+            result = this.root_node.innerHTML;
+            next_e.insertAdjacentElement('beforebegin', this.cursor);
+            return result
+        }
+        let parent = this.cursor.parentElement as Element;
+        this.cursor.remove();
+        result = this.root_node.innerHTML;
+        parent.appendChild(this.cursor);
+        return result;
+    }
     on_pointerdown(event: PointerEvent) {
         let e = event.target;
         if(!(e instanceof Element)) return;

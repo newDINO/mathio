@@ -504,8 +504,8 @@ function more_keys(on_key) {
     result.style.width = '10%';
     let svg = inner_svg();
     result.appendChild(svg);
-    let polyline = svg_polyline('20,40 20,80 60,80 60,40');
-    let polygon = svg_polygon('40,20 80,20 80,60 60,60 60,40 40,40');
+    let polyline = svg_polyline('20,40 20,80 60,80 60,40 20,40');
+    let polygon = svg_polygon('40,20 80,20 80,60 60,60 60,40 40,40 40,20');
     svg.append(polygon, polyline);
     return result;
 }
