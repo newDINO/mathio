@@ -19,7 +19,7 @@ window.addEventListener('pointerdown', (e) => {
     x = e.clientX;
     y = e.clientY;
     let rect = container.getBoundingClientRect();
-    if (!within_rect(x, y, rect) && showing) {
+    if (showing && !within_rect(x, y, rect)) {
         container.style.display = 'none';
         showing = false;
     }

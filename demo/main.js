@@ -25,7 +25,7 @@ under_bar.appendChild(copy_button);
 copy_button.classList.add('button');
 copy_button.style.marginLeft = 'auto';
 copy_button.style.backgroundImage = 'url("demo/res/copy.svg")';
-copy_button.addEventListener('pointerdown', () => {
+copy_button.addEventListener('click', () => {
     navigator.clipboard.writeText(mathio.to_ml_text()).then(() => {
         float_div.show_innerHTML("Copied");
     }, () => {
