@@ -58,3 +58,4 @@ keyboard_button.addEventListener('pointerdown', () => {
     }
 })
 
+document.body.appendChild(float_div.container)

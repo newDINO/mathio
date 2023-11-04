@@ -1,11 +1,12 @@
 let x = 0, y = 0;
-let container = document.createElement('div');
-document.body.appendChild(container);
+export let container = document.createElement('div');
 container.style.display = 'none';
 container.style.position = 'fixed';
-container.style.border = '1px solid grey';
+container.style.border = '1px solid lightgrey';
+container.style.padding = '2px';
 container.style.fontSize = 'small';
-container.style.background = 'white';
+container.style.color = 'grey';
+container.style.background = "inherit";
 let showing = false;
 export function show_innerHTML(s) {
     container.innerHTML = s;
@@ -18,7 +19,7 @@ window.addEventListener('pointerdown', (e) => {
     x = e.clientX;
     y = e.clientY;
     let rect = container.getBoundingClientRect();
-    if (!within_rect(x, y, rect)) {
+    if (!within_rect(x, y, rect) && showing) {
         container.style.display = 'none';
         showing = false;
     }

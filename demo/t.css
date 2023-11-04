@@ -3,11 +3,11 @@ body {
     justify-content: center;
     align-items: center;
     height: 100vh;
-	background-color: white;
+	background: white;
 }
 @media (prefers-color-scheme: dark) {
     body {
-        background-color: #111111;
+        background: #111111;
         color: white;
     }
     .button {
@@ -29,6 +29,7 @@ body {
     display: flex;
     justify-content: center;
     align-items: center;
+    box-sizing: border-box;
 }
 .math_container:focus {
     outline: none;
