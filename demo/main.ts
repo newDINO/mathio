@@ -1,5 +1,6 @@
 import { MathIO } from "../target/mathio.js";
 import { SoftKeyboard } from "../target/soft_keyboard.js"
+import * as float_div from "./float_div.js"
 
 let container = document.createElement('div');
 container.classList.add('container');
@@ -29,7 +30,14 @@ copy_button.classList.add('button');
 copy_button.style.marginLeft = 'auto';
 copy_button.style.backgroundImage = 'url("demo/res/copy.svg")';
 copy_button.addEventListener('pointerdown', () => {
-	navigator.clipboard.writeText(mathio.to_ml_text());
+	navigator.clipboard.writeText(mathio.to_ml_text()).then(
+		() => {
+			float_div.show_innerHTML("Copied");
+		},
+		() => {
+			float_div.show_innerHTML("Copy failed");
+		}
+	);
 })
 
 let keyboard_button = document.createElement('div');

@@ -40,20 +40,20 @@ export class MathIO {
         let prev_e = this.cursor.previousElementSibling;
         if (prev_e) {
             this.cursor.remove();
-            result = this.root_node.innerHTML;
+            result = element_html(this.root_node);
             prev_e.insertAdjacentElement('afterend', this.cursor);
             return result;
         }
         let next_e = this.cursor.nextElementSibling;
         if (next_e) {
             this.cursor.remove();
-            result = this.root_node.innerHTML;
+            result = element_html(this.root_node);
             next_e.insertAdjacentElement('beforebegin', this.cursor);
             return result;
         }
         let parent = this.cursor.parentElement;
         this.cursor.remove();
-        result = this.root_node.innerHTML;
+        result = element_html(this.root_node);
         parent.appendChild(this.cursor);
         return result;
     }
@@ -1154,4 +1154,7 @@ function insert_in_pos(x, container, to_insert) {
 }
 function within_rect(x, y, rect) {
     return x > rect.x && x < rect.x + rect.width && y > rect.y && y < rect.y + rect.height;
+}
+function element_html(e) {
+    return `<${e.tagName}>${e.innerHTML}</${e.tagName}>`;
 }
