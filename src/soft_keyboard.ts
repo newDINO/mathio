@@ -591,7 +591,8 @@ function updown_key(on_key: (key: string) => void): HTMLElement {
 	up_svg.setAttribute('viewBox', '0 0 100 100');
 	down_svg.setAttribute('viewBox', '0 0 100 100');
 	result.addEventListener('pointerdown', (e) => {
-		if(e.offsetY < result.offsetWidth * 0.5) {
+		let rect = result.getBoundingClientRect();
+		if(e.clientY < rect.height * 0.5 + rect.y) {
 			on_key('ArrowUp');
 			up_svg.style.backgroundColor = ''
 		} else {

@@ -16,5 +16,6 @@ try live demo [here](https://newdino.github.io/mathio)
     2. int: start 
 4. Matrix
 5. Selection 
-#### mathml and latex export 
+#### mathml and latex export 🏗 
 #### hand writing 
+#### improve compatibility with older browers 

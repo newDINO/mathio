@@ -347,6 +347,12 @@ export class MathIO {
 
         } else if(grand_parent.tagName == 'msub') {
             
+        } else if(grand_parent.tagName == 'munderover') {
+            let last_child = grand_parent.lastElementChild;
+            if(!last_child) throw INTERNAL_LOGIC_ERROR;
+            if(parent == last_child) {
+                
+            }
         }
     }
     private on_arrow_down() {
