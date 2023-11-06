@@ -24,6 +24,10 @@ let under_bar = document.createElement('div')
 under_bar.classList.add("bar")
 container.appendChild(under_bar);
 
+let bold_button = document.createElement('div');
+bold_button.classList.add('button');
+under_bar.appendChild(bold_button);
+
 let copy_button = document.createElement('div');
 under_bar.appendChild(copy_button);
 copy_button.classList.add('button');

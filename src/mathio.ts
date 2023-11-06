@@ -24,6 +24,13 @@ export class MathIO {
     public set vertical_fraction(setting: boolean) {
         this._vertical_fraction = setting
     }
+	private _bold = false;
+	public get bold(): boolean {
+		return this._bold;
+	}
+	public set bold(value: boolean) {
+		this._bold = value;
+	}
     constructor() {
         this._container = document.createElement('div');
         this._root_node = ml_text('math', '');
@@ -911,13 +918,29 @@ const ops = [
     "+", "-", "(", ")", "∏", "∑",
     "∂", "ⅆ", "Δ", "δ", "∇",
     "∫", "∬", "∭", "⨌", "∮", "∯",
-    "=", "≠", "⩾", ">", "<", "⩽"
-]
+    "=", "≠", "⩾", ">", "<", "⩽",
+	"·", "×"
+];
 function is_op(s: string): boolean {
     return ops.includes(s)
 }
 function underover_op(s: string): boolean {
     return s == '∏' || s == '∑'
+}
+function is_ascii_upper_char(code: number): boolean {
+	return (code >= 65 && code <= 90)
+}
+function is_ascii_lower_char(code: number): boolean {
+	return (code >= 97 && code <= 122) 
+}
+function to_bold(code: number): number {
+	if(is_ascii_upper_char(code)) {
+		return code + 0x1D400 - 65
+	} else if(is_ascii_lower_char(code)) {
+		return code + 0x1D41A - 97
+	} else {
+		return code
+	}
 }
 
 function split_element(e: Element, offset: number) { // the original element become the first one
