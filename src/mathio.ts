@@ -1,5 +1,6 @@
 import { complete } from "./complete/complete.js"
 import * as complete_ui from "./complete/ui.js"
+import { char_to_bold, is_ascii_lower_char, is_ascii_upper_char } from "./trans_char.js"
 const INTERNAL_LOGIC_ERROR = new Error('Internal logic error')
 const ORPHAN_ERROR = new Error('Element does not has a parent')
 export class MathIO {
@@ -197,6 +198,9 @@ export class MathIO {
         } else if(is_op(key)) {
             this.cursor.insertAdjacentElement('beforebegin', ml_text('mo', key));
         } else if(is_char(key)) {
+            if(this.bold) {
+                key = char_to_bold(key);
+            }
             this.on_char(key)
         } else if(key == '/') {
             this.on_fraction();
@@ -907,7 +911,7 @@ function is_char(s: string): boolean {
     let code = s.codePointAt(0)
     if(!code) throw BLANK_STRING_ERROR
     return (code >= 65 && code <= 90) || (code >= 97 && code <= 122) || (code >= 945 && code <= 969) ||
-    s == '∞'
+    s == '∞' || is_ascii_lower_char(code) || is_ascii_upper_char(code)
 }
 function is_num(s: string): boolean {
     let code = s.codePointAt(0)
@@ -915,32 +919,18 @@ function is_num(s: string): boolean {
     return (code >= 48 && code <= 57)
 }
 const ops = [
-    "+", "-", "(", ")", "∏", "∑",
-    "∂", "ⅆ", "Δ", "δ", "∇",
+    "+", "-","·", "×", ",",
+    "∂", "ⅆ", "Δ", "δ", "∇", "′", "″", "⁗", "‴",
     "∫", "∬", "∭", "⨌", "∮", "∯",
     "=", "≠", "⩾", ">", "<", "⩽",
-	"·", "×"
+	"(", ")", "[", "]", "{", "}",
+    "∏", "∑"
 ];
 function is_op(s: string): boolean {
     return ops.includes(s)
 }
 function underover_op(s: string): boolean {
     return s == '∏' || s == '∑'
-}
-function is_ascii_upper_char(code: number): boolean {
-	return (code >= 65 && code <= 90)
-}
-function is_ascii_lower_char(code: number): boolean {
-	return (code >= 97 && code <= 122) 
-}
-function to_bold(code: number): number {
-	if(is_ascii_upper_char(code)) {
-		return code + 0x1D400 - 65
-	} else if(is_ascii_lower_char(code)) {
-		return code + 0x1D41A - 97
-	} else {
-		return code
-	}
 }
 
 function split_element(e: Element, offset: number) { // the original element become the first one
@@ -983,7 +973,7 @@ function replace_parent(e: Element) {
 }
 const single_op = ["∂", "ⅆ", "Δ", "δ", "∇"]
 function is_single_op(e: Element): boolean {
-    return e.innerHTML in single_op
+    return single_op.includes(e.innerHTML)
 }
 function is_single_exp(e: Element): boolean {
     return e.tagName == 'mn' || e.tagName == 'mi' || e.tagName == 'msup' || e.tagName == 'msub' || e.tagName == 'mfrac' ||

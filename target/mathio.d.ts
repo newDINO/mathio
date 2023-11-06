@@ -11,6 +11,9 @@ export declare class MathIO {
     set warn_handle(handle: (warning: string) => void);
     private _vertical_fraction;
     set vertical_fraction(setting: boolean);
+    private _bold;
+    get bold(): boolean;
+    set bold(value: boolean);
     constructor();
     private warn;
     to_ml_text(): string;

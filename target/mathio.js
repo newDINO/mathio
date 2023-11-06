@@ -1,5 +1,6 @@
 import { complete } from "./complete/complete.js";
 import * as complete_ui from "./complete/ui.js";
+import { char_to_bold, is_ascii_lower_char, is_ascii_upper_char } from "./trans_char.js";
 const INTERNAL_LOGIC_ERROR = new Error('Internal logic error');
 const ORPHAN_ERROR = new Error('Element does not has a parent');
 export class MathIO {
@@ -15,10 +16,17 @@ export class MathIO {
     set vertical_fraction(setting) {
         this._vertical_fraction = setting;
     }
+    get bold() {
+        return this._bold;
+    }
+    set bold(value) {
+        this._bold = value;
+    }
     constructor() {
         this.completing = false;
         // settings
         this._vertical_fraction = true;
+        this._bold = false;
         this._container = document.createElement('div');
         this._root_node = ml_text('math', '');
         this._container.append(this._root_node, complete_ui.list_e);
@@ -212,6 +220,9 @@ export class MathIO {
             this.cursor.insertAdjacentElement('beforebegin', ml_text('mo', key));
         }
         else if (is_char(key)) {
+            if (this.bold) {
+                key = char_to_bold(key);
+            }
             this.on_char(key);
         }
         else if (key == '/') {
@@ -1060,7 +1071,7 @@ function is_char(s) {
     if (!code)
         throw BLANK_STRING_ERROR;
     return (code >= 65 && code <= 90) || (code >= 97 && code <= 122) || (code >= 945 && code <= 969) ||
-        s == '∞';
+        s == '∞' || is_ascii_lower_char(code) || is_ascii_upper_char(code);
 }
 function is_num(s) {
     let code = s.codePointAt(0);
@@ -1069,11 +1080,12 @@ function is_num(s) {
     return (code >= 48 && code <= 57);
 }
 const ops = [
-    "+", "-", "(", ")", "∏", "∑",
-    "∂", "ⅆ", "Δ", "δ", "∇",
+    "+", "-", "·", "×", ",",
+    "∂", "ⅆ", "Δ", "δ", "∇", "′", "″", "⁗", "‴",
     "∫", "∬", "∭", "⨌", "∮", "∯",
     "=", "≠", "⩾", ">", "<", "⩽",
-    "·", "×"
+    "(", ")", "[", "]", "{", "}",
+    "∏", "∑"
 ];
 function is_op(s) {
     return ops.includes(s);
@@ -1128,7 +1140,7 @@ function replace_parent(e) {
 }
 const single_op = ["∂", "ⅆ", "Δ", "δ", "∇"];
 function is_single_op(e) {
-    return e.innerHTML in single_op;
+    return single_op.includes(e.innerHTML);
 }
 function is_single_exp(e) {
     return e.tagName == 'mn' || e.tagName == 'mi' || e.tagName == 'msup' || e.tagName == 'msub' || e.tagName == 'mfrac' ||

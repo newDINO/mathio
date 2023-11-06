@@ -1,7 +1,4 @@
 body {
-    display: flex;
-    justify-content: center;
-    align-items: center;
     height: 100vh;
 	background: white;
 }
@@ -15,6 +12,11 @@ body {
     }
 }
 
+.inner_center {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
 .container::after {
     content: "";
     display: block;
@@ -26,9 +28,6 @@ body {
     height: 100px;
     padding: 7px;
     border: 1px grey solid;
-    display: flex;
-    justify-content: center;
-    align-items: center;
     box-sizing: border-box;
 }
 .math_container:focus {

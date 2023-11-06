@@ -2,6 +2,7 @@ import { MathIO } from "../target/mathio.js";
 import { SoftKeyboard } from "../target/soft_keyboard.js"
 import * as float_div from "./float_div.js"
 
+document.body.classList.add('inner_center')
 let container = document.createElement('div');
 container.classList.add('container');
 document.body.appendChild(container);
@@ -9,7 +10,7 @@ document.body.appendChild(container);
 let mathio = new MathIO()
 container.appendChild(mathio.container);
 mathio.container.setAttribute('tabindex', '0');
-mathio.container.classList.add('math_container')
+mathio.container.classList.add('math_container', 'inner_center')
 mathio.container.addEventListener('pointerdown', (e) => {
     mathio.on_pointerdown(e);
 })
@@ -25,8 +26,18 @@ under_bar.classList.add("bar")
 container.appendChild(under_bar);
 
 let bold_button = document.createElement('div');
-bold_button.classList.add('button');
+bold_button.innerHTML = 'B'
+bold_button.classList.add('button', 'inner_center');
 under_bar.appendChild(bold_button);
+bold_button.addEventListener('click', () => {
+    if(mathio.bold) {
+        bold_button.innerHTML = 'B'
+        mathio.bold = false
+    } else {
+        bold_button.innerHTML = '𝐁'
+        mathio.bold = true
+    }
+})
 
 let copy_button = document.createElement('div');
 under_bar.appendChild(copy_button);

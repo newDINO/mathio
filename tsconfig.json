@@ -4,7 +4,8 @@
         "src/complete/entity_data.ts",
         "src/complete/complete.ts",
         "src/complete/complete.ts",
-        "src/soft_keyboard.ts"
+        "src/soft_keyboard.ts",
+        "src/trans_char.ts"
     ],
     "compilerOptions": {
         "strict": true,
