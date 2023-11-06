@@ -198,6 +198,8 @@ export class MathIO {
         } else if(key == '\\') {
             this.completing = true;
             this.start_completing();
+        } else if(key.length == 1) {
+            this.cursor.insertAdjacentElement('beforebegin', ml_text('mtext', key))
         }
         this.resize_cursor()
     }
@@ -905,9 +907,14 @@ function is_num(s: string): boolean {
     if(!code) throw BLANK_STRING_ERROR
     return (code >= 48 && code <= 57)
 }
+const ops = [
+    "+", "-", "(", ")", "∏", "∑",
+    "∂", "ⅆ", "Δ", "δ", "∇",
+    "∫", "∬", "∭", "⨌", "∮", "∯",
+    "=", "≠", "⩾", ">", "<", "⩽"
+]
 function is_op(s: string): boolean {
-    return s == '+' || s == '-' || s == '=' || s == '(' || s == ')' ||
-        s == '∏' || s == '∑' || s == '∫' || s == 'ⅈ' || s == 'ⅆ'
+    return ops.includes(s)
 }
 function underover_op(s: string): boolean {
     return s == '∏' || s == '∑'
@@ -951,8 +958,13 @@ function replace_parent(e: Element) {
     }
     parent.remove();
 }
+const single_op = ["∂", "ⅆ", "Δ", "δ", "∇"]
+function is_single_op(e: Element): boolean {
+    return e.innerHTML in single_op
+}
 function is_single_exp(e: Element): boolean {
-    return e.tagName == 'mn' || e.tagName == 'mi' || e.tagName == 'msup' || e.tagName == 'msub' || e.tagName == 'mfrac'
+    return e.tagName == 'mn' || e.tagName == 'mi' || e.tagName == 'msup' || e.tagName == 'msub' || e.tagName == 'mfrac' ||
+        is_single_op(e)
 }
 function is_group_exp(e: Element): boolean {
     return e.tagName == 'msup' || e.tagName == 'msub' || e.tagName == 'mfrac' || e.tagName == 'msqrt'

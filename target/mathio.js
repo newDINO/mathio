@@ -224,6 +224,9 @@ export class MathIO {
             this.completing = true;
             this.start_completing();
         }
+        else if (key.length == 1) {
+            this.cursor.insertAdjacentElement('beforebegin', ml_text('mtext', key));
+        }
         this.resize_cursor();
     }
     start_completing() {
@@ -394,6 +397,13 @@ export class MathIO {
         else if (grand_parent.tagName == 'msup') {
         }
         else if (grand_parent.tagName == 'msub') {
+        }
+        else if (grand_parent.tagName == 'munderover') {
+            let last_child = grand_parent.lastElementChild;
+            if (!last_child)
+                throw INTERNAL_LOGIC_ERROR;
+            if (parent == last_child) {
+            }
         }
     }
     on_arrow_down() {
@@ -1058,9 +1068,14 @@ function is_num(s) {
         throw BLANK_STRING_ERROR;
     return (code >= 48 && code <= 57);
 }
+const ops = [
+    "+", "-", "(", ")", "∏", "∑",
+    "∂", "ⅆ", "Δ", "δ", "∇",
+    "∫", "∬", "∭", "⨌", "∮", "∯",
+    "=", "≠", "⩾", ">", "<", "⩽"
+];
 function is_op(s) {
-    return s == '+' || s == '-' || s == '=' || s == '(' || s == ')' ||
-        s == '∏' || s == '∑' || s == '∫' || s == 'ⅈ' || s == 'ⅆ';
+    return ops.includes(s);
 }
 function underover_op(s) {
     return s == '∏' || s == '∑';
@@ -1110,8 +1125,13 @@ function replace_parent(e) {
     }
     parent.remove();
 }
+const single_op = ["∂", "ⅆ", "Δ", "δ", "∇"];
+function is_single_op(e) {
+    return e.innerHTML in single_op;
+}
 function is_single_exp(e) {
-    return e.tagName == 'mn' || e.tagName == 'mi' || e.tagName == 'msup' || e.tagName == 'msub' || e.tagName == 'mfrac';
+    return e.tagName == 'mn' || e.tagName == 'mi' || e.tagName == 'msup' || e.tagName == 'msub' || e.tagName == 'mfrac' ||
+        is_single_op(e);
 }
 function is_group_exp(e) {
     return e.tagName == 'msup' || e.tagName == 'msub' || e.tagName == 'mfrac' || e.tagName == 'msqrt';
