@@ -107,7 +107,7 @@ class FirstPage {
 					this.shift_state = ShiftState.Not;
 					this.unshift_straight();
 					this.shift_key.set_background(button_color)
-					this.shift_key.set_fill('black')
+					this.shift_key.set_fill(text_color)
 				}
 			} else {
 				if(this.shift_state == ShiftState.Not) {
@@ -121,7 +121,7 @@ class FirstPage {
 					this.shift_state = ShiftState.Not;
 					this.unshift_straight();
 					this.shift_key.set_background(button_color)
-					this.shift_key.set_fill('black')
+					this.shift_key.set_fill(text_color)
 				}
 			}
 		})
@@ -301,7 +301,9 @@ class SecondPage {
 		this.shift_page.append(line1s, line2s, line3s, line4s, line5s)
 	}
 }
-let button_color = 'rgb(127 127 127 / .5)'
+let button_color = 'rgb(127 127 127 / .25)'
+let button_border = '1px rgb(127 127 127 / .75) solid'
+let text_color = 'black'
 function html_e(type: string): HTMLElement {
 	return document.createElement(type)
 }
@@ -325,10 +327,12 @@ function svg_char(c: string): SVGElement {
 	let text = svg_e('text');
 	text.innerHTML = c;
 	svg.appendChild(text);
+	text.setAttribute('fill', text_color)
 	text.setAttribute('font-size', '10px');
 	text.setAttribute('font-family', 'math, serif')
 	text.setAttribute('y', '10');
-	svg.setAttribute('viewBox', '0 0 10 10');
+	svg.setAttribute('viewBox', '0 0 10 12');
+	svg.setAttribute('preserveAspectRatio', 'xMinYMid meet');
 	return svg;
 }
 function create_inner(): HTMLElement {
@@ -336,6 +340,7 @@ function create_inner(): HTMLElement {
 	inner.style.margin = '5%'
 	inner.style.width = inner.style.height = '90%'
 	inner.style.backgroundColor = button_color;
+	inner.style.border = button_border;
 	inner.style.position = 'relative'
 	return inner
 }
@@ -345,12 +350,13 @@ function inner_svg(): SVGElement {
 	result.style.height = '90%'
 	result.style.margin = '5%'
 	result.style.backgroundColor = button_color
+	result.style.border = button_border;
 	result.setAttribute('viewBox', '0 0 100 100');
 	return result;
 }
 function svg_line(x1: number, y1: number, x2: number, y2: number): SVGElement {
 	let line = svg_e('line')
-	line.setAttribute('stroke', 'black');
+	line.setAttribute('stroke', text_color);
 	line.setAttribute('x1', x1.toString())
 	line.setAttribute('y1', y1.toString())
 	line.setAttribute('x2', x2.toString())
@@ -359,15 +365,15 @@ function svg_line(x1: number, y1: number, x2: number, y2: number): SVGElement {
 }
 function svg_polyline(points: string): SVGElement {
 	let result = svg_e('polyline')
-	result.setAttribute('stroke', 'black');
+	result.setAttribute('stroke', text_color);
 	result.setAttribute('fill', 'none')
 	result.setAttribute('points', points);
 	return result;
 }
 function svg_polygon(points: string): SVGElement {
 	let result = svg_e('polygon')
-	result.setAttribute('fill', 'black')
-	result.setAttribute('stroke', 'black')
+	result.setAttribute('fill', text_color)
+	result.setAttribute('stroke', text_color)
 	result.setAttribute('points', points);
 	return result;
 }
@@ -583,6 +589,7 @@ function updown_key(on_key: (key: string) => void): HTMLElement {
 	let up_svg = svg_e('svg');
 	let down_svg = svg_e('svg');
 	inner.append(up_svg, down_svg);
+	inner.style.border = button_border;
 	up_svg.style.backgroundColor = down_svg.style.backgroundColor = button_color;
 	up_svg.style.width = down_svg.style.width = '100%';
 	up_svg.style.height = down_svg.style.height = '50%';
@@ -717,6 +724,7 @@ function space_key(on_key: (key: string) => void): HTMLElement {
 	inner.style.width = '95%';
 	inner.style.height = '90%';
 	inner.style.backgroundColor = button_color;
+	inner.style.border = button_border;
 	result.addEventListener('pointerdown', () => {
 		on_key(' ');
 		inner.style.backgroundColor = ''
@@ -755,6 +763,6 @@ class ShiftKeyS {
 		this.arrow.setAttribute('fill', 'none');
 	}
 	set_short() {
-		this.arrow.setAttribute('fill', 'black');
+		this.arrow.setAttribute('fill', text_color);
 	}
 }
