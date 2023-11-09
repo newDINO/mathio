@@ -66,3 +66,11 @@ keyboard_button.addEventListener('pointerdown', () => {
     }
 });
 document.body.appendChild(float_div.container);
+let last_touch_end = 0;
+window.addEventListener('touchend', (e) => {
+    let now = performance.now();
+    if (now - last_touch_end < 300) {
+        e.preventDefault();
+    }
+    last_touch_end = now;
+});
