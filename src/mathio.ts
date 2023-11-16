@@ -293,42 +293,38 @@ export class MathIO {
         if(!grand_parent) throw ORPHAN_ERROR;
         let prev_e = this.cursor.previousElementSibling;
         let next_e = this.cursor.nextElementSibling;
-        if(prev_e) {
-            if(underover_op(prev_e.innerHTML)) {
-                encircle_element(prev_e, "munderover");
-                let underover_e = prev_e.parentElement as MathMLElement;
-                let over_e = ml_nodes('mrow', this.cursor);
-                let under_e = ml_space();
-                underover_e.append(under_e, over_e);
-            } else if(prev_e.tagName == 'munderover') {
-                let last_child = prev_e.lastElementChild;
-                if(!last_child) throw INTERNAL_LOGIC_ERROR;
-                if(last_child.tagName != 'mrow') {
-                    encircle_element(last_child, "mrow");
-                }
-                if(last_child.tagName == 'mspace') {
-                    last_child.remove();
-                }
-                (prev_e.lastElementChild as Element).appendChild(this.cursor);
+        if(prev_e && underover_op(prev_e.innerHTML)) {
+            encircle_element(prev_e, "munderover");
+            let underover_e = prev_e.parentElement as MathMLElement;
+            let over_e = ml_nodes('mrow', this.cursor);
+            let under_e = ml_space();
+            underover_e.append(under_e, over_e);
+        } else if(prev_e && prev_e.tagName == 'munderover') {
+            let last_child = prev_e.lastElementChild;
+            if(!last_child) throw INTERNAL_LOGIC_ERROR;
+            if(last_child.tagName != 'mrow') {
+                encircle_element(last_child, "mrow");
             }
-        } else if(next_e) {
-            if(underover_op(next_e.innerHTML)) {
+            if(last_child.tagName == 'mspace') {
+                last_child.remove();
+            }
+            (prev_e.lastElementChild as Element).appendChild(this.cursor);
+        } else if(next_e && underover_op(next_e.innerHTML)) {
                 encircle_element(next_e, "munderover");
                 let underover_e = next_e.parentElement as MathMLElement;
                 let over_e = ml_nodes('mrow', this.cursor);
                 let under_e = ml_space();
                 underover_e.append(under_e, over_e);
-            } else if(next_e.tagName == 'munderover') {
-                let last_child = next_e.lastElementChild;
-                if(!last_child) throw INTERNAL_LOGIC_ERROR;
-                if(last_child.tagName != 'mrow') {
-                    encircle_element(last_child, "mrow");
-                }
-                if(last_child.tagName == 'mspace') {
-                    last_child.remove();
-                }
-                (next_e.lastElementChild as Element).insertAdjacentElement('afterbegin', this.cursor);
+        } else if(next_e && next_e.tagName == 'munderover') {
+            let last_child = next_e.lastElementChild;
+            if(!last_child) throw INTERNAL_LOGIC_ERROR;
+            if(last_child.tagName != 'mrow') {
+                encircle_element(last_child, "mrow");
             }
+            if(last_child.tagName == 'mspace') {
+                last_child.remove();
+            }
+            (next_e.lastElementChild as Element).insertAdjacentElement('afterbegin', this.cursor);
         } else if(grand_parent.tagName == 'mfrac' && parent == grand_parent.lastElementChild) {
             if(parent.childElementCount == 1) {
                 parent.appendChild(ml_space());
@@ -375,42 +371,38 @@ export class MathIO {
         if(!grand_parent) throw ORPHAN_ERROR;
         let prev_e = this.cursor.previousElementSibling;
         let next_e = this.cursor.nextElementSibling;
-        if(prev_e) {
-            if(underover_op(prev_e.innerHTML)) {
-                encircle_element(prev_e, "munderover");
-                let underover_e = prev_e.parentElement as MathMLElement;
-                let over_e = ml_space();
-                let under_e = ml_nodes('mrow', this.cursor);
-                underover_e.append(under_e, over_e);
-            } else if(prev_e.tagName == 'munderover') {
-                let second_child = prev_e.children[1];
-                if(!second_child) throw INTERNAL_LOGIC_ERROR;
-                if(second_child.tagName != 'mrow') {
-                    encircle_element(second_child, "mrow");
-                }
-                if(second_child.tagName == 'mspace') {
-                    second_child.remove();
-                }
-                prev_e.children[1].appendChild(this.cursor);
+        if(prev_e && underover_op(prev_e.innerHTML)) {
+            encircle_element(prev_e, "munderover");
+            let underover_e = prev_e.parentElement as MathMLElement;
+            let over_e = ml_space();
+            let under_e = ml_nodes('mrow', this.cursor);
+            underover_e.append(under_e, over_e);
+        } else if(prev_e && prev_e.tagName == 'munderover') {
+            let second_child = prev_e.children[1];
+            if(!second_child) throw INTERNAL_LOGIC_ERROR;
+            if(second_child.tagName != 'mrow') {
+                encircle_element(second_child, "mrow");
             }
-        } else if(next_e) {
-            if(underover_op(next_e.innerHTML)) {
-                encircle_element(next_e, "munderover");
-                let underover_e = next_e.parentElement as MathMLElement;
-                let over_e = ml_space();
-                let under_e = ml_nodes('mrow', this.cursor);
-                underover_e.append(under_e, over_e);
-            } else if(next_e.tagName == 'munderover') {
-                let second_child = next_e.children[1];
-                if(!second_child) throw INTERNAL_LOGIC_ERROR;
-                if(second_child.tagName != 'mrow') {
-                    encircle_element(second_child, "mrow");
-                }
-                if(second_child.tagName == 'mspace') {
-                    second_child.remove();
-                }
-                next_e.children[1].insertAdjacentElement('afterbegin', this.cursor);
+            if(second_child.tagName == 'mspace') {
+                second_child.remove();
             }
+            prev_e.children[1].appendChild(this.cursor);
+        } else if(next_e && underover_op(next_e.innerHTML)) {
+            encircle_element(next_e, "munderover");
+            let underover_e = next_e.parentElement as MathMLElement;
+            let over_e = ml_space();
+            let under_e = ml_nodes('mrow', this.cursor);
+            underover_e.append(under_e, over_e);
+        } else if(next_e && next_e.tagName == 'munderover') {
+            let second_child = next_e.children[1];
+            if(!second_child) throw INTERNAL_LOGIC_ERROR;
+            if(second_child.tagName != 'mrow') {
+                encircle_element(second_child, "mrow");
+            }
+            if(second_child.tagName == 'mspace') {
+                second_child.remove();
+            }
+            next_e.children[1].insertAdjacentElement('afterbegin', this.cursor);
         }  else if(grand_parent.tagName == 'mfrac' && parent == grand_parent.firstElementChild) {
             if(parent.childElementCount == 1) {
                 parent.appendChild(ml_space());
