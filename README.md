@@ -12,14 +12,16 @@ try live demo [here](https://newdino.github.io/mathio)
         1. autoclear when both empty ✔️ 
         2. leaving space when empty ✔️ 
         3. arrow left and right leaving ✔️ 
-        4. arrow down/up for switching and grandgrandparent behavior 
-        5. cursor enter and leave 
-    2. integral 
+        4. arrow down/up for switching and grandgrandparent behavior ✔️ 
+        5. cursor enter and leave ✔️ 
+    2. integral ✔️
 4. short cuts for square and ... 
 5. undo and redo 
-6. Matrix 
-7. bracket automation 
+6. Matrix 🏗 
+7. bracket auto fill 
 8. Selection 
+9. remove parentElement error 
+10. fix display bugs in firefox
 #### mathml and latex export 🏗 
 #### hand writing 
 #### improve compatibility with older browers 

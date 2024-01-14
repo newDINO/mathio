@@ -24,6 +24,9 @@ export declare class MathIO {
     private refresh_completing;
     private on_complete_key;
     private resize_cursor;
+    private on_enter;
+    private on_bra;
+    private on_space;
     private on_arrow_up;
     private on_arrow_down;
     private on_arrow_right;

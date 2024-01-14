@@ -66,7 +66,7 @@ export class MathIO {
         return result;
     }
     on_pointerdown(event) {
-        var _a;
+        var _a, _b, _c;
         let e = event.target;
         if (!(e instanceof Element))
             return;
@@ -98,7 +98,7 @@ export class MathIO {
         if (e.tagName != 'mrow' && (parent.tagName == 'msqrt' || parent.tagName == 'mfrac' || parent.tagName == 'msub' || (parent.tagName == 'msup' && e == parent.lastElementChild))) {
             encircle_element(e, 'mrow');
         }
-        if (e.tagName == 'mo' || e.tagName == 'mi') {
+        if ((e.tagName == 'mo' && ((_a = e.parentElement) === null || _a === void 0 ? void 0 : _a.tagName) != 'munderover' && ((_b = e.parentElement) === null || _b === void 0 ? void 0 : _b.tagName) != 'msubsup') || e.tagName == 'mi') {
             if (parent.tagName == 'msub' && e.parentElement && e.parentElement == parent.firstElementChild) {
                 e.insertAdjacentElement('afterend', this.cursor);
                 start_modify(e.parentElement);
@@ -167,7 +167,7 @@ export class MathIO {
             }
         }
         else if (e.tagName == 'mspace' && e != this.cursor) {
-            (_a = e.parentElement) === null || _a === void 0 ? void 0 : _a.appendChild(this.cursor);
+            (_c = e.parentElement) === null || _c === void 0 ? void 0 : _c.appendChild(this.cursor);
             e.remove();
         }
         if (last_next_e && last_prev_e && last_next_e.previousElementSibling && last_next_e.tagName == 'mn' && last_prev_e.tagName == 'mn' && last_next_e.previousElementSibling != this.cursor) {
@@ -191,6 +191,9 @@ export class MathIO {
         }
         if (key == 'ArrowRight') {
             this.on_arrow_right();
+        }
+        else if (key == 'Enter') {
+            this.on_enter();
         }
         else if (key == 'ArrowLeft') {
             this.on_arrow_left();
@@ -234,6 +237,12 @@ export class MathIO {
         else if (key == '\\') {
             this.completing = true;
             this.start_completing();
+        }
+        else if (key == ' ') {
+            this.on_space();
+        }
+        else if (is_bra(key)) {
+            this.on_bra(key);
         }
         else if (key.length == 1) {
             this.cursor.insertAdjacentElement('beforebegin', ml_text('mtext', key));
@@ -321,6 +330,55 @@ export class MathIO {
         this.cursor.setAttribute('height', compute_e.getBoundingClientRect().height + 3 + 'px');
         compute_e.remove();
     }
+    on_enter() {
+        let parent = this.cursor.parentElement;
+        let grand_parent = parent.parentElement;
+        if (parent.tagName == 'mtd' && parent.childElementCount > 0) {
+            let grand_grand_parent = grand_parent.parentElement;
+            grand_grand_parent.appendChild(ml_nodes('mtr', ml_nodes('mtd', this.cursor)));
+            return;
+        }
+        let prev_es = after_bra(this.cursor);
+        if (prev_es) {
+            let table = ml_e('mtable');
+            this.cursor.insertAdjacentElement('beforebegin', table);
+            let td1 = ml_e('mtd');
+            for (let i = prev_es.length - 1; i >= 0; i--) {
+                td1.appendChild(prev_es[i]);
+            }
+            let tr1 = ml_nodes('mtr', td1);
+            table.appendChild(tr1);
+            let td2 = ml_nodes('mtd', this.cursor);
+            let tr2 = ml_nodes('mtr', td2);
+            table.appendChild(tr2);
+        }
+    }
+    on_bra(key) {
+        let mrow = ml_nodes('mrow', ml_text('mo', key));
+        this.cursor.insertAdjacentElement('beforebegin', mrow);
+        mrow.append(this.cursor, ml_text('mo', bracket_pair[key]));
+    }
+    on_space() {
+        let parent = this.cursor.parentElement;
+        let grand_parent = parent.parentElement;
+        if (parent.tagName == 'mtd' && parent.childElementCount > 0) {
+            grand_parent.appendChild(ml_nodes('mtd', this.cursor));
+            return;
+        }
+        let prev_es = after_bra(this.cursor);
+        if (prev_es) {
+            let table = ml_e('mtable');
+            this.cursor.insertAdjacentElement('beforebegin', table);
+            let tr = ml_e('mtr');
+            table.appendChild(tr);
+            let td1 = ml_e('mtd');
+            tr.appendChild(td1);
+            for (let i = prev_es.length - 1; i >= 0; i--) {
+                td1.appendChild(prev_es[i]);
+            }
+            tr.appendChild(ml_nodes('mtd', this.cursor));
+        }
+    }
     on_arrow_up() {
         let parent = this.cursor.parentElement;
         if (!parent)
@@ -337,17 +395,15 @@ export class MathIO {
             let under_e = ml_space();
             underover_e.append(under_e, over_e);
         }
-        else if (prev_e && prev_e.tagName == 'munderover') {
-            let last_child = prev_e.lastElementChild;
-            if (!last_child)
-                throw INTERNAL_LOGIC_ERROR;
-            if (last_child.tagName != 'mrow') {
-                encircle_element(last_child, "mrow");
-            }
-            if (last_child.tagName == 'mspace') {
-                last_child.remove();
-            }
-            prev_e.lastElementChild.appendChild(this.cursor);
+        else if (prev_e && prev_e.innerHTML == '∫') {
+            encircle_element(prev_e, "msubsup");
+            let subsup_e = prev_e.parentElement;
+            let over_e = ml_nodes('mrow', this.cursor);
+            let under_e = ml_space();
+            subsup_e.append(under_e, over_e);
+        }
+        else if (prev_e && (prev_e.tagName == 'munderover' || prev_e.tagName == 'msubsup')) {
+            enter_row(prev_e.lastElementChild, this.cursor);
         }
         else if (next_e && underover_op(next_e.innerHTML)) {
             encircle_element(next_e, "munderover");
@@ -356,60 +412,38 @@ export class MathIO {
             let under_e = ml_space();
             underover_e.append(under_e, over_e);
         }
-        else if (next_e && next_e.tagName == 'munderover') {
-            let last_child = next_e.lastElementChild;
-            if (!last_child)
-                throw INTERNAL_LOGIC_ERROR;
-            if (last_child.tagName != 'mrow') {
-                encircle_element(last_child, "mrow");
-            }
-            if (last_child.tagName == 'mspace') {
-                last_child.remove();
-            }
-            next_e.lastElementChild.insertAdjacentElement('afterbegin', this.cursor);
+        else if (next_e && next_e.innerHTML == '∫') {
+            encircle_element(next_e, "msubsup");
+            let subsup_e = next_e.parentElement;
+            let over_e = ml_nodes('mrow', this.cursor);
+            let under_e = ml_space();
+            subsup_e.append(under_e, over_e);
         }
-        else if (grand_parent.tagName == 'mfrac' && parent == grand_parent.lastElementChild) {
-            if (parent.childElementCount == 1) {
-                parent.appendChild(ml_space());
-            }
-            if (!grand_parent.firstElementChild)
-                throw INTERNAL_LOGIC_ERROR;
-            let first_child = grand_parent.firstElementChild;
-            if (first_child.tagName != 'mrow') {
-                encircle_element(first_child, 'mrow');
-                if (first_child.tagName == 'mspace') {
-                    first_child.remove();
-                    grand_parent.firstElementChild.appendChild(this.cursor);
-                }
-                else {
-                    let rect = first_child.getBoundingClientRect();
-                    let middle = rect.x + rect.width * 0.5;
-                    if (this.cursor.getBoundingClientRect().x > middle) {
-                        first_child.insertAdjacentElement('afterend', this.cursor);
-                    }
-                    else {
-                        first_child.insertAdjacentElement('beforebegin', this.cursor);
-                    }
-                }
-            }
-            else {
-                insert_in_pos(this.cursor.getBoundingClientRect().x, first_child, this.cursor);
-            }
-            if (parent.childElementCount == 1) {
-                if (!parent.firstElementChild)
-                    throw INTERNAL_LOGIC_ERROR;
-                replace_parent(parent.firstElementChild);
-            }
+        else if (next_e && (next_e.tagName == 'munderover' || next_e.tagName == 'msubsup')) {
+            enter_row(next_e.lastElementChild, this.cursor);
         }
         else if (grand_parent.tagName == 'msup') {
         }
         else if (grand_parent.tagName == 'msub') {
         }
-        else if (grand_parent.tagName == 'munderover') {
+        else if (grand_parent.tagName == 'munderover' || grand_parent.tagName == 'msubsup') {
             let last_child = grand_parent.lastElementChild;
-            if (!last_child)
-                throw INTERNAL_LOGIC_ERROR;
+            let second_child = grand_parent.children[1];
+            if (parent == second_child) {
+                enter_row(last_child, this.cursor);
+                leave_row(second_child);
+            }
+            else if (parent == last_child) {
+            }
+        }
+        else if (grand_parent.tagName == 'mfrac') {
+            let last_child = grand_parent.lastElementChild;
+            let first_child = grand_parent.firstElementChild;
             if (parent == last_child) {
+                enter_row(first_child, this.cursor);
+                leave_row(last_child);
+            }
+            else if (parent == first_child) {
             }
         }
     }
@@ -429,17 +463,15 @@ export class MathIO {
             let under_e = ml_nodes('mrow', this.cursor);
             underover_e.append(under_e, over_e);
         }
-        else if (prev_e && prev_e.tagName == 'munderover') {
-            let second_child = prev_e.children[1];
-            if (!second_child)
-                throw INTERNAL_LOGIC_ERROR;
-            if (second_child.tagName != 'mrow') {
-                encircle_element(second_child, "mrow");
-            }
-            if (second_child.tagName == 'mspace') {
-                second_child.remove();
-            }
-            prev_e.children[1].appendChild(this.cursor);
+        else if (prev_e && prev_e.innerHTML == '∫') {
+            encircle_element(prev_e, "msubsup");
+            let subsup_e = prev_e.parentElement;
+            let over_e = ml_space();
+            let under_e = ml_nodes('mrow', this.cursor);
+            subsup_e.append(under_e, over_e);
+        }
+        else if (prev_e && (prev_e.tagName == 'munderover' || prev_e.tagName == 'msubsup')) {
+            enter_row(prev_e.children[1], this.cursor);
         }
         else if (next_e && underover_op(next_e.innerHTML)) {
             encircle_element(next_e, "munderover");
@@ -448,49 +480,34 @@ export class MathIO {
             let under_e = ml_nodes('mrow', this.cursor);
             underover_e.append(under_e, over_e);
         }
-        else if (next_e && next_e.tagName == 'munderover') {
-            let second_child = next_e.children[1];
-            if (!second_child)
-                throw INTERNAL_LOGIC_ERROR;
-            if (second_child.tagName != 'mrow') {
-                encircle_element(second_child, "mrow");
-            }
-            if (second_child.tagName == 'mspace') {
-                second_child.remove();
-            }
-            next_e.children[1].insertAdjacentElement('afterbegin', this.cursor);
+        else if (next_e && next_e.innerHTML == '∫') {
+            encircle_element(next_e, "msubsup");
+            let subsup_e = next_e.parentElement;
+            let over_e = ml_space();
+            let under_e = ml_nodes('mrow', this.cursor);
+            subsup_e.append(under_e, over_e);
         }
-        else if (grand_parent.tagName == 'mfrac' && parent == grand_parent.firstElementChild) {
-            if (parent.childElementCount == 1) {
-                parent.appendChild(ml_space());
+        else if (next_e && (next_e.tagName == 'munderover' || next_e.tagName == 'msubsup')) {
+            enter_row(next_e.children[1], this.cursor);
+        }
+        else if (grand_parent.tagName == 'mfrac') {
+            let first_child = grand_parent.firstElementChild;
+            let last_child = grand_parent.lastElementChild;
+            if (parent == first_child) {
+                enter_row(last_child, this.cursor);
+                leave_row(first_child);
             }
-            if (!grand_parent.lastElementChild)
-                throw INTERNAL_LOGIC_ERROR;
-            let first_child = grand_parent.lastElementChild;
-            if (first_child.tagName != 'mrow') {
-                encircle_element(first_child, 'mrow');
-                if (first_child.tagName == 'mspace') {
-                    first_child.remove();
-                    grand_parent.lastElementChild.appendChild(this.cursor);
-                }
-                else {
-                    let rect = first_child.getBoundingClientRect();
-                    let middle = rect.x + rect.width * 0.5;
-                    if (this.cursor.getBoundingClientRect().x > middle) {
-                        first_child.insertAdjacentElement('afterend', this.cursor);
-                    }
-                    else {
-                        first_child.insertAdjacentElement('beforebegin', this.cursor);
-                    }
-                }
+            else if (parent == last_child) {
             }
-            else {
-                insert_in_pos(this.cursor.getBoundingClientRect().x, first_child, this.cursor);
+        }
+        else if (grand_parent.tagName == 'munderover' || grand_parent.tagName == 'msubsup') {
+            let second_child = grand_parent.children[1];
+            let last_child = grand_parent.lastElementChild;
+            if (parent == last_child) {
+                enter_row(second_child, this.cursor);
+                leave_row(last_child);
             }
-            if (parent.childElementCount == 1) {
-                if (!parent.firstElementChild)
-                    throw INTERNAL_LOGIC_ERROR;
-                replace_parent(parent.firstElementChild);
+            else if (parent == last_child) {
             }
         }
     }
@@ -543,16 +560,7 @@ export class MathIO {
                 }
             }
             else if (next_e.tagName == 'mfrac') {
-                if (!next_e.firstElementChild)
-                    throw INTERNAL_LOGIC_ERROR;
-                let first_child = next_e.firstElementChild;
-                if (first_child.tagName != 'mrow') {
-                    encircle_element(first_child, 'mrow');
-                }
-                if (first_child.tagName == 'mspace') {
-                    first_child.remove();
-                }
-                next_e.firstElementChild.insertAdjacentElement('afterbegin', this.cursor);
+                enter_row(next_e.firstElementChild, this.cursor);
             }
             else if (grand_parent.tagName == 'msup' && parent == grand_parent.firstElementChild && next_e.innerHTML == ')' && next_e == parent.lastElementChild) {
                 if (!grand_parent.lastElementChild || !parent.firstElementChild)
@@ -566,16 +574,10 @@ export class MathIO {
                 }
             }
             else if (next_e.tagName == 'msqrt') {
-                if (!next_e.firstElementChild)
-                    throw INTERNAL_LOGIC_ERROR;
-                let first_child = next_e.firstElementChild;
-                if (first_child.tagName != 'mrow') {
-                    encircle_element(first_child, 'mrow');
-                }
-                if (first_child.tagName == 'mspace') {
-                    first_child.remove();
-                }
-                next_e.firstElementChild.insertAdjacentElement('afterbegin', this.cursor);
+                enter_row(next_e.firstElementChild, this.cursor);
+            }
+            else if (next_e.innerHTML == ')') {
+                parent.insertAdjacentElement('afterend', this.cursor);
             }
             else {
                 next_e.insertAdjacentElement('afterend', this.cursor);
@@ -655,7 +657,7 @@ export class MathIO {
                 grand_parent.appendChild(space);
             }
         }
-        else if (grand_parent.tagName == 'munderover') {
+        else if (grand_parent.tagName == 'munderover' || grand_parent.tagName == 'msubsup') {
             if (parent.childElementCount == 1) {
                 parent.appendChild(ml_space());
             }
@@ -674,6 +676,16 @@ export class MathIO {
                 throw INTERNAL_LOGIC_ERROR;
             if (second_child.tagName == 'mspace' && third_child.tagName == 'mspace') {
                 replace_parent(first_child);
+            }
+        }
+        else if (grand_parent.tagName == 'mtr') {
+            let next_td = parent.nextElementSibling;
+            if (next_td) {
+                next_td.insertAdjacentElement('afterbegin', this.cursor);
+            }
+            else {
+                let grand_grand_parent = grand_parent.parentElement;
+                grand_grand_parent.insertAdjacentElement('afterend', this.cursor);
             }
         }
     }
@@ -696,28 +708,16 @@ export class MathIO {
                 prev_e.lastElementChild.appendChild(this.cursor);
             }
             else if (prev_e.tagName == 'mfrac') {
-                if (!prev_e.lastElementChild)
-                    throw INTERNAL_LOGIC_ERROR;
-                let last_child = prev_e.lastElementChild;
-                if (last_child.tagName != 'mrow') {
-                    encircle_element(last_child, 'mrow');
-                }
-                if (last_child.tagName == 'mspace') {
-                    last_child.remove();
-                }
-                prev_e.lastElementChild.appendChild(this.cursor);
+                enter_row(prev_e.lastElementChild, this.cursor);
             }
             else if (prev_e.tagName == 'msqrt') {
-                if (!prev_e.firstElementChild)
+                enter_row(prev_e.firstElementChild, this.cursor);
+            }
+            else if (prev_e.tagName == 'mrow') {
+                let last_child = prev_e.lastElementChild;
+                if (!last_child)
                     throw INTERNAL_LOGIC_ERROR;
-                let first_child = prev_e.firstElementChild;
-                if (first_child.tagName != 'mrow') {
-                    encircle_element(first_child, 'mrow');
-                }
-                if (first_child.tagName == 'mspace') {
-                    first_child.remove();
-                }
-                prev_e.firstElementChild.appendChild(this.cursor);
+                last_child.insertAdjacentElement("beforebegin", this.cursor);
             }
             else if (prev_e.tagName == 'mn') {
                 if (prev_e.innerHTML.length > 1) {
@@ -763,70 +763,78 @@ export class MathIO {
                 prev_e.insertAdjacentElement('beforebegin', this.cursor);
             }
         }
-        else {
-            if (grand_parent.tagName == 'msub') {
-                if (parent == grand_parent.lastElementChild) {
+        else if (grand_parent.tagName == 'msub') {
+            if (parent == grand_parent.lastElementChild) {
+                if (!grand_parent.firstElementChild)
+                    throw INTERNAL_LOGIC_ERROR;
+                encircle_element(grand_parent.firstElementChild, 'mrow');
+                grand_parent.firstElementChild.appendChild(this.cursor);
+                start_modify(grand_parent.firstElementChild);
+                this.cursor.style.visibility = 'hidden';
+                if (parent.childElementCount == 1) {
+                    replace_parent(parent.firstElementChild);
+                }
+            }
+        }
+        else if (grand_parent.tagName == 'msup') {
+            if (parent == grand_parent.lastElementChild) {
+                let first_child = grand_parent.firstElementChild;
+                if (!first_child)
+                    throw INTERNAL_LOGIC_ERROR;
+                if (first_child.tagName == 'mrow') {
+                    if (!first_child.lastElementChild)
+                        throw INTERNAL_LOGIC_ERROR;
+                    first_child.lastElementChild.insertAdjacentElement('beforebegin', this.cursor);
+                }
+                else {
                     if (!grand_parent.firstElementChild)
                         throw INTERNAL_LOGIC_ERROR;
                     encircle_element(grand_parent.firstElementChild, 'mrow');
                     grand_parent.firstElementChild.appendChild(this.cursor);
-                    start_modify(grand_parent.firstElementChild);
-                    this.cursor.style.visibility = 'hidden';
-                    if (parent.childElementCount == 1) {
-                        replace_parent(parent.firstElementChild);
-                    }
                 }
-            }
-            else if (grand_parent.tagName == 'msup') {
-                if (parent == grand_parent.lastElementChild) {
-                    let first_child = grand_parent.firstElementChild;
-                    if (!first_child)
-                        throw INTERNAL_LOGIC_ERROR;
-                    if (first_child.tagName == 'mrow') {
-                        if (!first_child.lastElementChild)
-                            throw INTERNAL_LOGIC_ERROR;
-                        first_child.lastElementChild.insertAdjacentElement('beforebegin', this.cursor);
-                    }
-                    else {
-                        if (!grand_parent.firstElementChild)
-                            throw INTERNAL_LOGIC_ERROR;
-                        encircle_element(grand_parent.firstElementChild, 'mrow');
-                        grand_parent.firstElementChild.appendChild(this.cursor);
-                    }
-                    if (parent.childElementCount == 1) {
-                        replace_parent(parent.firstElementChild);
-                    }
-                }
-            }
-            else if (grand_parent.tagName == 'mfrac') {
-                if (parent.childElementCount == 1) {
-                    parent.appendChild(ml_space());
-                }
-                grand_parent.insertAdjacentElement('beforebegin', this.cursor);
                 if (parent.childElementCount == 1) {
                     replace_parent(parent.firstElementChild);
                 }
             }
-            else if (grand_parent.tagName == 'munderover') {
-                if (parent.childElementCount == 1) {
-                    parent.appendChild(ml_space());
-                }
-                grand_parent.insertAdjacentElement('beforebegin', this.cursor);
-                if (parent.childElementCount == 1) {
-                    replace_parent(parent.firstElementChild);
-                }
-                let first_child = grand_parent.firstElementChild;
-                if (!first_child)
-                    throw INTERNAL_LOGIC_ERROR;
-                let second_child = first_child.nextElementSibling;
-                if (!second_child)
-                    throw INTERNAL_LOGIC_ERROR;
-                let third_child = second_child.nextElementSibling;
-                if (!third_child)
-                    throw INTERNAL_LOGIC_ERROR;
-                if (second_child.tagName == 'mspace' && third_child.tagName == 'mspace') {
-                    replace_parent(first_child);
-                }
+        }
+        else if (grand_parent.tagName == 'mfrac') {
+            if (parent.childElementCount == 1) {
+                parent.appendChild(ml_space());
+            }
+            grand_parent.insertAdjacentElement('beforebegin', this.cursor);
+            if (parent.childElementCount == 1) {
+                replace_parent(parent.firstElementChild);
+            }
+        }
+        else if (grand_parent.tagName == 'munderover' || grand_parent.tagName == 'msubsup') {
+            if (parent.childElementCount == 1) {
+                parent.appendChild(ml_space());
+            }
+            grand_parent.insertAdjacentElement('beforebegin', this.cursor);
+            if (parent.childElementCount == 1) {
+                replace_parent(parent.firstElementChild);
+            }
+            let first_child = grand_parent.firstElementChild;
+            if (!first_child)
+                throw INTERNAL_LOGIC_ERROR;
+            let second_child = first_child.nextElementSibling;
+            if (!second_child)
+                throw INTERNAL_LOGIC_ERROR;
+            let third_child = second_child.nextElementSibling;
+            if (!third_child)
+                throw INTERNAL_LOGIC_ERROR;
+            if (second_child.tagName == 'mspace' && third_child.tagName == 'mspace') {
+                replace_parent(first_child);
+            }
+        }
+        else if (grand_parent.tagName == 'mtr') {
+            let prev_td = parent.previousElementSibling;
+            if (prev_td) {
+                prev_td.appendChild(this.cursor);
+            }
+            else {
+                let grand_grand_parent = grand_parent.parentElement;
+                grand_grand_parent.insertAdjacentElement('afterend', this.cursor);
             }
         }
     }
@@ -938,18 +946,8 @@ export class MathIO {
             sup_e.appendChild(this.cursor);
         }
         else if (prev_e.innerHTML == ')') {
-            let contained_e = [prev_e];
-            let has_bra = false;
-            let previous_e = prev_e.previousElementSibling;
-            while (previous_e) {
-                contained_e.push(previous_e);
-                if (previous_e.innerHTML == '(') {
-                    has_bra = true;
-                    break;
-                }
-                previous_e = previous_e.previousElementSibling;
-            }
-            if (has_bra) {
+            let contained_e = after_bra(this.cursor);
+            if (contained_e) {
                 let base_e = ml_e('mrow');
                 for (let i = contained_e.length - 1; i >= 0; i--) {
                     base_e.appendChild(contained_e[i]);
@@ -1076,11 +1074,21 @@ const ops = [
     "∂", "ⅆ", "Δ", "δ", "∇", "′", "″", "⁗", "‴",
     "∫", "∬", "∭", "⨌", "∮", "∯",
     "=", "≠", "⩾", ">", "<", "⩽",
-    "(", ")", "[", "]", "{", "}",
     "∏", "∑"
 ];
 function is_op(s) {
     return ops.includes(s);
+}
+const bras = [
+    "(", '[', '{'
+];
+const bracket_pair = {
+    "(": ")",
+    "[": ']',
+    "{": "}"
+};
+function is_bra(s) {
+    return bras.includes(s);
 }
 function underover_op(s) {
     return s == '∏' || s == '∑';
@@ -1165,7 +1173,8 @@ function start_modify(e) {
     e.style.color = 'white';
     e.style.backgroundColor = 'grey';
 }
-function insert_in_pos(x, container, to_insert) {
+function insert_in_pos(container, to_insert) {
+    let x = to_insert.getBoundingClientRect().x;
     let es = Array.from(container.children);
     for (let e of es) {
         let rect = e.getBoundingClientRect();
@@ -1182,4 +1191,53 @@ function within_rect(x, y, rect) {
 }
 function element_html(e) {
     return `<${e.tagName}>${e.innerHTML}</${e.tagName}>`;
+}
+function enter_row(row, cursor) {
+    if (row == null)
+        throw INTERNAL_LOGIC_ERROR;
+    if (row.tagName == 'mrow') {
+        insert_in_pos(row, cursor);
+    }
+    else if (row.tagName == 'mspace') {
+        encircle_element(row, 'mrow');
+        row.insertAdjacentElement('beforebegin', cursor);
+        row.remove();
+    }
+    else {
+        encircle_element(row, 'mrow');
+        let x_cursor = cursor.getBoundingClientRect().x;
+        let row_rect = row.getBoundingClientRect();
+        let mid_row = row_rect.x + row_rect.width * 0.5;
+        if (x_cursor > mid_row) {
+            row.insertAdjacentElement('afterend', cursor);
+        }
+        else {
+            row.insertAdjacentElement('beforebegin', cursor);
+        }
+    }
+}
+function leave_row(row) {
+    if (row == null)
+        throw INTERNAL_LOGIC_ERROR;
+    if (row.tagName == 'mrow') {
+        if (row.childElementCount == 0) {
+            row.appendChild(ml_space());
+        }
+        if (row.childElementCount == 1) {
+            let first_child = row.firstElementChild;
+            replace_parent(first_child);
+        }
+    }
+}
+function after_bra(cursor) {
+    let prev_e = cursor.previousElementSibling;
+    let prev_es = [];
+    while (prev_e != null) {
+        if (is_bra(prev_e.innerHTML)) {
+            return prev_es;
+        }
+        prev_es.push(prev_e);
+        prev_e = prev_e.previousElementSibling;
+    }
+    return null;
 }
