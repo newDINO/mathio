@@ -5,6 +5,8 @@ export declare class MathIO {
     private completing_e2;
     private _root_node;
     private _container;
+    highlight_color: string;
+    history: string[];
     get container(): HTMLElement;
     get root_node(): MathMLElement;
     private _warn_handle;
@@ -16,9 +18,13 @@ export declare class MathIO {
     set bold(value: boolean);
     constructor();
     private warn;
+    undo(): void;
+    redu(): void;
     to_ml_text(): string;
     on_pointerdown(event: PointerEvent): void;
     on_key(key: string): void;
+    private dehighlight_parent;
+    private highlight_parent;
     private start_completing;
     private stop_completing;
     private refresh_completing;

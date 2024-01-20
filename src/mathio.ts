@@ -10,6 +10,8 @@ export class MathIO {
     private completing_e2: MathMLElement;
     private _root_node: MathMLElement;
     private _container: HTMLElement;
+    highlight_color: string = 'lightgrey';
+    history: string[] = [];
     public get container(): HTMLElement {
         return this._container;
     }
@@ -50,6 +52,15 @@ export class MathIO {
     private warn(warning: string) {
         if(this._warn_handle) this._warn_handle(warning)
     }
+    do() {
+        
+    }
+    undo() {
+        
+    }
+    redo() {
+        
+    }
     to_ml_text(): string {
         let result;
         let prev_e = this.cursor.previousElementSibling;
@@ -73,6 +84,7 @@ export class MathIO {
         return result;
     }
     on_pointerdown(event: PointerEvent) {
+        this.dehighlight_parent()
         let e = event.target;
         if(!(e instanceof Element)) return;
         if(this.completing) {
@@ -170,9 +182,11 @@ export class MathIO {
         if(is_group_exp(last_grand_parent) && last_parent.childElementCount == 1 && last_parent.firstElementChild && last_parent.firstElementChild != this.cursor) {
             replace_parent(last_parent.firstElementChild);
         }
+        this.highlight_parent()
         this.resize_cursor()
     }
     on_key(key: string) {
+        this.dehighlight_parent()
         if(this.completing) {
             this.on_complete_key(key);
             return
@@ -189,6 +203,8 @@ export class MathIO {
             this.on_arrow_up()
         } else if(key == 'ArrowDown') {
             this.on_arrow_down()
+        } else if(key == 'Shift') {
+            
         } else if(key.length > 1) {
             return;
         } else if(key == '_') {
@@ -219,6 +235,16 @@ export class MathIO {
             this.cursor.insertAdjacentElement('beforebegin', ml_text('mtext', key))
         }
         this.resize_cursor()
+        this.highlight_parent()
+    }
+    private dehighlight_parent() {
+        (this.cursor.parentElement as MathMLElement).style.backgroundColor = ''
+    }
+    private highlight_parent() {
+        let parent = this.cursor.parentElement as MathMLElement;
+        if(parent.tagName != 'math') {
+            parent.style.backgroundColor = this.highlight_color;
+        }
     }
     private start_completing() {
         complete_ui.refresh(complete(''));
@@ -615,10 +641,8 @@ export class MathIO {
             } else if(prev_e.tagName == 'msqrt') {
                 enter_row(prev_e.firstElementChild, this.cursor)
             } else if(prev_e.tagName == 'mrow') {
-                let last_child = prev_e.lastElementChild;
-                if(!last_child) throw INTERNAL_LOGIC_ERROR;
-                if(prev_e.innerHTML == ')') {
-                    last_child.insertAdjacentElement("beforebegin", this.cursor)
+                if(prev_e.children[1].tagName == 'mtable') {
+                    
                 }
             } else if(prev_e.innerHTML == '(') {
             } else if(prev_e.tagName == 'mn') {

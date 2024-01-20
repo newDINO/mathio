@@ -39,6 +39,13 @@ bold_button.addEventListener('click', () => {
     }
 })
 
+let undo_button = document.createElement('div')
+under_bar.appendChild(undo_button);
+undo_button.classList.add('button', 'inner_center')
+bold_button.addEventListener('click', () => {
+  mathio.undo()
+})
+
 let copy_button = document.createElement('div');
 under_bar.appendChild(copy_button);
 copy_button.classList.add('button');

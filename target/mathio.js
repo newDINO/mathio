@@ -24,6 +24,8 @@ export class MathIO {
     }
     constructor() {
         this.completing = false;
+        this.highlight_color = 'lightgrey';
+        this.history = [];
         // settings
         this._vertical_fraction = true;
         this._bold = false;
@@ -42,6 +44,10 @@ export class MathIO {
     warn(warning) {
         if (this._warn_handle)
             this._warn_handle(warning);
+    }
+    undo() {
+    }
+    redu() {
     }
     to_ml_text() {
         let result;
@@ -67,6 +73,7 @@ export class MathIO {
     }
     on_pointerdown(event) {
         var _a, _b, _c;
+        this.dehighlight_parent();
         let e = event.target;
         if (!(e instanceof Element))
             return;
@@ -182,9 +189,11 @@ export class MathIO {
         if (is_group_exp(last_grand_parent) && last_parent.childElementCount == 1 && last_parent.firstElementChild && last_parent.firstElementChild != this.cursor) {
             replace_parent(last_parent.firstElementChild);
         }
+        this.highlight_parent();
         this.resize_cursor();
     }
     on_key(key) {
+        this.dehighlight_parent();
         if (this.completing) {
             this.on_complete_key(key);
             return;
@@ -206,6 +215,8 @@ export class MathIO {
         }
         else if (key == 'ArrowDown') {
             this.on_arrow_down();
+        }
+        else if (key == 'Shift') {
         }
         else if (key.length > 1) {
             return;
@@ -248,6 +259,16 @@ export class MathIO {
             this.cursor.insertAdjacentElement('beforebegin', ml_text('mtext', key));
         }
         this.resize_cursor();
+        this.highlight_parent();
+    }
+    dehighlight_parent() {
+        this.cursor.parentElement.style.backgroundColor = '';
+    }
+    highlight_parent() {
+        let parent = this.cursor.parentElement;
+        if (parent.tagName != 'math') {
+            parent.style.backgroundColor = this.highlight_color;
+        }
     }
     start_completing() {
         complete_ui.refresh(complete(''));
@@ -714,10 +735,10 @@ export class MathIO {
                 enter_row(prev_e.firstElementChild, this.cursor);
             }
             else if (prev_e.tagName == 'mrow') {
-                let last_child = prev_e.lastElementChild;
-                if (!last_child)
-                    throw INTERNAL_LOGIC_ERROR;
-                last_child.insertAdjacentElement("beforebegin", this.cursor);
+                if (prev_e.children[1].tagName == 'mtable') {
+                }
+            }
+            else if (prev_e.innerHTML == '(') {
             }
             else if (prev_e.tagName == 'mn') {
                 if (prev_e.innerHTML.length > 1) {
